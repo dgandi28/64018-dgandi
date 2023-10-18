@@ -1,0 +1,257 @@
+---
+title: "BA_64018_Assignment_3"
+author: "Durga Prasad Gandi"
+date: "2023-10-14"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load the required Packages
+
+```{r}
+library(knitr)
+library(kableExtra)
+library(lpSolve)
+
+```
+### Table Creation for the Transportation Problem
+
+
+
+```{r}
+
+table_T <- matrix(c("$20", "$14", "$25", "$400", 100,
+                  "$12", "$15", "$14", "$300", 125,
+                  "$10", "$12", "$15", "$500", 150,
+                  80, 90, 70, "-", "-"), nrow = 4, byrow = TRUE)
+
+colnames(table_T) <- c("W1", "W2", "W3", "cost", "Supply")
+rownames(table_T) <- c("PlantA", "PlantB", "PlantC", "Demand")
+table_T <- as.table(table_T)
+
+table_T
+
+```
+
+```{r}
+
+
+table_T %>% kable() %>% kable_classic() %>%
+  column_spec(2, border_left = TRUE) %>%
+  column_spec(6, border_left = TRUE) %>%
+  row_spec(3, extra_css = "border-bottom:dotted;")
+
+```
+In this transportation problem, there are 375 supply units and 240 demand units. In this transportation problem, supply and demand are not balanced.The creation of a dummy variable transforms the unbalanced transportation problem into a balanced one as the first step in solving it. Since there is currently a shortage of supply compared to demand, we will create a fictitious demand (dummy column) with 135 fictitious units of demand and no transportation costs. Dummy demand has been generated, and the transportation problem now looks like this:
+
+```{r}
+
+
+
+table_T1 <- matrix(c(420, 414, 425, 0, 100,
+                    312, 315, 314, 0, 125,
+                    510, 512, 515, 0, 150,
+                    80, 90, 70, 135, 375), byrow = TRUE, nrow = 4)
+
+colnames(table_T1) <- c("W1", "W2", "W3", "Dummy", "Supply")
+rownames(table_T1) <- c("PlantA", "PlantB", "PlantC", "Demand")
+table_T1 <- as.table(table_T1)
+
+table_T1
+
+```
+
+```{r}
+
+
+table_T1 %>% kable() %>% kable_classic() %>%
+  column_spec(2, border_left = TRUE) %>%
+  column_spec(6, border_left = TRUE) %>%
+  row_spec(4, extra_css = "border-bottom:dotted;")
+
+```
+
+Supply and demand are now equal. Finally, the Transportation Problem can now be resolved.
+
+
+
+**The transportation model can be  formulated using the above info.**
+
+***Objective Function***
+
+$$Min=420L_{11} + 414L_{12} + 425L_{13} + 0L_{14} + 312L_{21} + 315L_{22} + 314L_{23} + 0L_{24} + 510L_{31} + 512L_{32} + 515L_{33} + 0L_{34}$$
+
+**Supply constraints:**
+
+***Plant A:***
+
+
+$$L_{11} + L_{12} + L_{13} + L_{14} = 100$$
+
+***Plant B:***
+
+$$L_{21} + L_{22} +L_{23} + L_{24} = 125$$
+
+***Plant C:***
+
+$$L_{31} + L_{32} + L_{33} + L_{34} = 150$$
+
+**Demand constraints:**
+
+***Warehouse 1:***
+
+$$L_{11} + L_{21} + L_{31} = 80$$
+
+***Warehouse 2:***
+
+$$L_{12} + L_{22} + L_{32} = 90$$
+
+***Warehouse 3:***
+
+$$L_{13}+L_{23}+L_{33} = 70$$
+
+***Dummy Warehouse:***
+
+$$L_{14}+L_{24}+L_{34} = 135$$
+
+**Non-negativity of the decision variables:**
+
+
+$$L_{11}, L_{12}, L_{13}, L_{14}, L_{21}, L_{22}, L_{23}, L_{24}, L_{31}, L_{32}, L_{33}, L_{34} >= 0$$
+
+
+## Formulating the transportation model
+
+```{r}
+
+
+costs <- matrix(c(420, 414, 425, 0,
+                  312, 315, 314, 0,
+                  510, 512, 515, 0), byrow = TRUE, nrow = 3)
+
+## setup constraints and rhs(supply)
+row.signs <- rep("=", 3)
+row.rhs <- c(100, 125, 150)
+
+##demand side constraints and rhs
+col.signs <- rep("=", 4)
+col.rhs <- c(80, 90, 70, 135)
+
+##run the model
+lptrans <- lp.transport(costs, "min", row.signs, row.rhs, col.signs, col.rhs)
+
+
+lptrans
+
+lptrans$solution
+
+
+```
+
+## Dual of the primal transportation model
+
+There are two types of classes in constraints: demand and supply. The constraints coefficients, as we know, will become the coefficients in the objective function for dual. The primary goal is to reduce transportation costs, and the secondary goal is to maximize profit by adding value. That is the profit made from selling goods less the cost of production. In this case, the supply constraint coefficients are 100,125, and 150. The demand constraint coefficients are 80,90,70,135, respectively.
+
+
+***Objective function:***
+
+$$Max=80l_1+90l_2+70l_3−100l_1−125l_2−150l_3$$
+
+***Constraints:***
+
+$$l_j−m_i>=n_{ij}$$
+
+***Plant A has to Supply 3 Warehouses***
+
+$$l_1-m_1≥n_{11}=420$$
+
+$$l_1−m_2≥n_{12}=414$$
+
+$$l_1−m_3≥n_{13}=425$$
+
+***Plant B has to Supply for 3 Warehouses***
+
+$$l_2−m_1≥n_{21}=312$$
+
+$$l_2−m_2≥n_{22}=315$$
+
+$$l_2−m_3≥n_{23}=314$$
+
+***Plant C has to Supply for 3 Warehouses***
+
+$$l_3−m_1≥n_{31}=510$$
+
+$$l_3−m_2≥n_{32}=512$$
+
+$$l_3−m_3≥n_{33}=515$$
+
+***Non-Negative Constraints***
+
+$$l_1, l_2, l_3, m_1, m_2, m_3, n_{11}, n_{12},  n_{13} ,n_{21}, n_{22},  n_{23},n_{31}, n_{32},  n_{33} >= 0$$
+
+## Economic Interpretation of the Dual
+
+1.According to the MR=MC rule,The dual constraint will be,
+
+$$l_j-m_i >= n_{ij}$$
+                      
+ So the equation would be: 
+ $$l_j>=n_{ij}+m_i$$
+
+To be Accurate, 
+                           $$l_1 >= n_{11} =420+m_1$$
+                           
+. The per-unit revenue generated by selling one unit of the product is shown on the left side. In economics, this is referred to as "MR (marginal revenue)." The cost of making and transporting goods per unit is shown on the right side. This is referred to as "MC." (marginal cost).
+
+Plant A will continue to increase production and shipping to Warehouse 1 as long as 
+$$l_1>=n_{11}=420+m_1$$
+and
+
+$$MR>=MC$$
+                         
+Plant A, on the other hand, reduces production and shipping                                  
+
+$$l_1<=n_{11}=420+m_1$$
+when
+
+$$MR<=MC$$
+                         
+                         
+The production either increases or decreases in both of dynamic situations. When 
+
+
+$$l_1=n_{11}=420+m_1$$
+
+When 
+
+$$MR=MC$$
+
+
+The producer neither increases nor decreases production. Hence it is  referred to as profit maximization equilibrium. Therefore, in the dual, the transportation cost minimization problem is equivalent to profit maximization, resulting in 
+
+$$MR=MC$$.
+
+
+2.Whether or not to hire a shipping business to send goods if
+
+$$l_j-m_i>=n_{ij}$$
+
+Plant A directly feeds commodities to Warehouse 1 from Plant A. If the supplier discovers another shipping firm that can deliver items from the plants to the warehouses while satisfying 
+
+$$l_j-m_i<=n_{ij}$$
+The supplier hires the shipping company rather than being personally involved in the transportation of goods. If the producer discovers a shipping business willing to transport items that satisfy the limits rather than >=, the producer engages the shipping firm. As a result, if
+
+$$l_j-m_i>=n_{ij}$$
+
+
+the producer (supplier) and shipper are the same. However, if $$l_j-m_i<=n_{ij}$$
+
+
+The manufacturer (supply) just creates items and employs another shipping business for the goods  transportation.
+
+
