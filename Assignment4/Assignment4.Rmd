@@ -3,8 +3,8 @@ title: "BA64060_Assignment4"
 author: "Durga Prasad Gandi"
 date: "2023-11-10"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -30,6 +30,8 @@ library(factoextra)
 library(FactoMineR)
 
 library(ggcorrplot)
+
+library(dbscan)
 ```
 ## Load the dataset
 
@@ -39,26 +41,13 @@ pharmaceutical1 = pharmaceutical[3:11]
 head(pharmaceutical1)
 ```
 
-First entity has the highest market cap at 68.44, while 3rd has the lowest at 6.30.Market cap is a measure of a company's size, calculated by doing product of stock price by the number of outstanding shares
-
-With a beta of 1.11, entity 6 has the highest volatility when compared to the market.**
-
-With a PE ratio of 82.5, Entity 2 has the highest, indicating a rather expensive valuation.
-The PE ratio, which shows how much investors are ready to pay for each dollar of earnings, is calculated by dividing the company's stock price by its earnings per share.
-
-With the lowest asset turnover (0.6), Entity 5 may be using its assets less effectively to drive sales.
-The effectiveness with which a business generates revenue from its assets is gauged by asset turnover.
-
+First entity has the highest market cap at 68.44, while 3rd has the lowest at 6.30.With a beta of 1.11, entity 6 has the highest volatility when compared to the market.**
+With a PE ratio of 82.5, Entity 2 has the highest, indicating a rather expensive valuation.The PE ratio, which shows how much investors are ready to pay for each dollar of earnings, is calculated by dividing the company's stock price by its earnings per share.With the lowest asset turnover (0.6), Entity 5 may be using its assets less effectively to drive sales.
 With a leverage ratio of 0.60, Entity 2 has the highest level of debt in its capital structure.
 Leverage quantifies how much debt a business uses to fund its operations.
-
 5th Entity has experienced a significant rise in sales, as evidenced by its highest revenue growth of 26.81%.
 The percentage rise in revenues over a given period for a corporation is known as revenue growth.
-
 With a net profit margin of 16.1%, Entity 1 has the largest, suggesting a comparatively greater percentage of revenue kept as profit.
-
-**These measures provide information on a number of financial performance factors for each organization, such as leverage, profitability, valuation, and effective use of assets. Additionally, the industry and unique circumstances of each business may influence interpretation.**
-
 ```{r}
 summary(pharmaceutical1)
 ```
@@ -186,3 +175,100 @@ Cluster4 has all types of exchange rates but of smaller count
 Cluster2 has more count than cluster4 but less than the remaining exchanges types.
 Each bar graph represents the frequency or count of observations comes under into a specific combination of cluster and exchange.It helps in visualizing the distribution of observations across different clusters and exchanges. Plot above we can say that they are  useful when you want to compare the distribution of a categorical variable (Exchange) across different levels of another categorical variable (Clusters).
 plot gives us insights into how the distribution of exchanges changes with in clusters.
+
+
+# Summary
+1)
+
+Reason for Choosing Market_Cap, Beta, PE_Ratio, ROE, ROA, Asset_Turnover, Leverage, Rev_Growth, and Net_Profit_Margin
+The selected variables Market_Cap, Beta, PE_Ratio, ROE, ROA, Asset_Turnover, Leverage, Rev_Growth, and Net_Profit_Margin are common financial metrics used to evaluate and compare the performance of companies. These variables collectively provide a comprehensive overview of a firm's financial health, profitability, and efficiency.
+
+K-means has been selected over DBSCAN because, K-means is often used in exploratory data analysis to identify patterns and groupings within the data, K-means clustering can provide insights into the financial profiles of pharmaceutical firms. It may reveal groups of firms with similar financial characteristics, aiding in strategic decision-making or investment analysis, easy to interpret, and DBSCAN is effective for datasets with dense regions.
+
+**Market_Cap:**
+Range will be from 0.41 to 199.47.
+Indicates the overall size and valuation of the pharmaceutical firms.
+
+**2. 
+Beta:**
+Ranges from 0.18 to 1.11.
+Measures the sensitivity of a firm's returns to market fluctuations.
+
+**3. PE_Ratio:**
+Ranges from 3.6 to 82.5.
+Represents the valuation of a firm's stock relative to its earnings.
+
+**4. ROE:**
+Ranges from 3.9 to 62.9.
+Indicates how effectively a firm utilizes shareholder equity to generate profit.
+
+**5. ROA:**
+Ranges from 0.3 to 1.1.
+Measures a firm's ability to generate profit from its assets.
+
+**6. Asset_Turnover:**
+Ranges from 0.5 to 1.1.
+Represents how efficiently a firm utilizes its assets to generate revenue.
+
+**7. Leverage:**
+Ranges from 0 to 3.51.
+Reflects the extent to which a firm uses debt to finance its operations.
+
+**8. Rev_Growth:**
+Ranges from -3.17 to 34.21.
+Indicates the percentage change in revenue over a specific period.
+
+**9.Net_Profit_Margin:**
+Ranges from 2.6 to 25.54.
+Represents the percentage of revenue that turns into profit.
+
+**2) Pattern in the clusters with respect to the numerical variables (10 to 12)**
+
+Cluster 1:
+It has moderate buy and moderate sell,also 1st cluster has three locations in which US is the highest and has only one exchange that is NYSE.
+
+Cluster 2:
+
+Median Recommendation for the Cluster 2 has low hold and low buy with locations(US and Canada) that were distributed evenly  .Surprisingly it has the same as cluster1 i.e  only one exchange that is NYSE.
+
+Cluster 3:
+
+Cluster 3 Median Recommendation is very strong hold and high moderate sell
+and  also clear that it has three locations, US has more numbers, next UK and Switzerland
+NYSE which is very high in number in case of Exchange rate for the Cluster 3 
+Cluster 4:
+
+Cluster 4 has Median Recommendation which is strong hold and low buy.
+and  has two locations in which US is high when  compared to Germany.
+Exchanges(AMEX, NASDAQ, NYSE) for the  Cluster 4   and all of them are distributed equally .
+
+Cluster 5:
+
+Median Recommendation for Cluster 5 has high hold and high buy.It also has two locations in which US is in significantly high compared to UK which is too less and only one exchange that is NYSE.
+
+*3)appropriate name for each cluster:*
+
+For Cluster 1 it can be named as Profitable Ventures
+
+For Cluster 2 it can be named as Risk-Reward Seekers
+
+For Cluster 3 it can be named as Stable Giants
+
+For Cluster 4  it can be named as Beta Boosted Enterprises
+
+For Cluster 5 it can be named as Market Dominators
+
+Indications or interpret for each of clusters 
+
+Cluster 1: AVE, WPI, MRX, ELN indicates moderate values across Market_Cap, Beta, PE_Ratio, ROE, ROA, Asset_Turnover, Leverage, Rev_Growth, and Net_Profit_Margin.
+
+Cluster 2:PHA, AGN indicates lower Market_Cap, Beta, and PE_Ratio.
+
+Cluster 3: WYE, BMY,AZN, SGP, AHM, LLY,NVS, ABT indicates higher Market_Cap, Beta, PE_Ratio, Rev_Growth, and Net_Profit_Margin compared to other clusters.
+
+Cluster 4:IVX, CHTT, BAY indicates lower Market_Cap and PE_Ratio.
+
+Cluster 5: GSK, PFE, MRK, JNJ indicates higher values across Market_Cap, Beta, PE_Ratio, ROE, ROA, Asset_Turnover, Rev_Growth, and Net_Profit_Margin.
+
+
+
