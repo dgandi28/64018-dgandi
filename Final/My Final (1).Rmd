@@ -1,0 +1,140 @@
+---
+title: "Final Exam"
+author: "Durga Prasad Gandi"
+date: "2023-12-05"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+##Load the required Libraries
+library(cluster) 
+library(dplyr)
+library(flexclust)
+library(factoextra)
+library(FactoMineR) 
+library(ggcorrplot)
+library(dbscan)
+```
+
+```{r}
+#Read the datbase
+fuel_met= read.csv("C:/Users/gdurg/Downloads/fuel_receipts1.csv") 
+filter_data = fuel_met[10:12] 
+head(filter_data)
+
+```
+
+```{r}
+
+norm_data = scale(filter_data) 
+row.names(norm_data) = fuel_met[,1] 
+distance = get_dist(norm_data) 
+corr = cor(norm_data)
+
+```
+
+```{r}
+
+fviz_nbclust(norm_data, kmeans, method = "silhouette")
+
+```
+
+
+**The Sharp rise in the above graph indicates k=4 is the best value**
+
+```{r}
+set.seed(1) 
+k5 = kmeans(norm_data, centers = 4, nstart = 25) 
+k5$centers
+```
+
+```{r}
+k5$size
+```
+
+```{r}
+fviz_cluster(k5, data = norm_data)
+```
+
+```{r}
+fviz_nbclust(norm_data, kmeans, method = "wss")
+```
+
+The Elbow graph here shows the sharp decrease at k=5 
+
+***The elbow method's main concept is to plot the explained variation, also known as the within-cluster sum of squares, as a function of the number of clusters after running the clustering algorithm for a range of cluster numbers. The "elbow" of the plot denotes the point k=5 which the  variation begins to decline more slowly, suggesting that the performance of the model remains mostly unchanged even with the addition of more clusters.***
+```{r}
+set.seed(1) 
+k51 = kcca(norm_data, k=4, kccaFamily("kmedians")) 
+k51
+
+clusters_index = predict(k51) 
+dist(k51@centers)
+
+image(k51) 
+points(norm_data, col=clusters_index, pch=19, cex=0.3)
+```
+
+```{r}
+
+filter_data %>% mutate(Cluster = k5$cluster) %>% group_by(Cluster) %>% summarise_all("mean")
+
+clusplot(norm_data,k5$cluster, main="Clusters",color = TRUE, labels = 3,lines = 0)
+
+```
+##Summary:
+
+
+Based on their lower-than-average sulfur and low-ash contents, Cluster 1 looks to be a set of fuel samples with favorable combustion properties. Reduced emissions of sulfur dioxide during burning are suggested by the lower sulfur content, which improves the environment. Cluster 1 is not the most affordable option, but it strikes a compromise between reasonable pricing and cleaner combustion qualities, making it a potentially appealing option for enterprises looking for an ecologically friendly and cost-effective fuel source.
+
+
+With an average sulfur content, a higher-than-average ash concentration, and a noticeably reduced fuel cost per MMBtu, Cluster 2 has a unique composition.  The higher proportion of ash points to a higher degree of impurity in the form of non-combustible residue, which could provide problems for energy production in general because of increased emissions and the possibility of equipment corrosion. 
+
+In cluster 3 the fuels  are particularly noteworthy because of their clean combustion characteristics and noticeably greater cost per MMBtu. These fuels include low ash content, which suggests a more effective and ecologically friendly energy production process, and low sulfur content, which helps to reduce emissions during combustion. These fuels appear to be more expensive than others based on the significant rise in fuel cost per MMBtu seen in this cluster. 
+
+Cluster 4, which includes fuels with a unique composition marked by greater levels of ash and sulfur, offers an intriguing contrast. Fuels in this cluster have a cost benefit over average fuel costs per MMBtu, despite these elevated levels of impurity. The intriguing combination of lower production costs and higher pollutant content could mean that the fuels in Cluster 4 are less processed or refined, which would make them a more affordable choice for producing energy. Higher amounts of ash and sulfur should be carefully addressed in terms of their possible environmental effects, since greater emissions during combustion may outweigh the benefits to the economy.
+
+
+Realative composition:
+
+For Cluster1:
+
+Content of Sulfur: Low (0.0167)
+Ash Content: Very Minimal (0)
+Moderate fuel cost per MMBtu (8.06).
+Cluster 1 fuels have reasonable combustion qualities and a very low sulfur and ash level, making them environmentally beneficial. The feature that strikes a compromise between cost-effectiveness and cleaner combustion is indicated by the  fuel cost per MMBtu.
+
+Cluster2:
+
+Moderate Sulfur Content (0.771)
+Average Ash Content (8.90)
+Relatively cheap fuel cost per MMBtu (2.20)
+The fuels in Cluster 2 are less expensive per MMBtu, but they have a moderate sulfur level and a somewhat greater ash percentage. A trade-off between cost-effectiveness and impurity levels is represented by this cluster.
+
+cluster3:
+
+Minimal Sulfur Content (0.131)
+Ash Content: Very less (0)
+Expensive per MMBtu of fuel (19.7)
+The low sulfur and ash level of the fuels in Cluster 3 points to cleaner combustion. The demand for cleaner fuels at a higher production cost is indicated by the higher fuel cost per MMBtu.
+
+
+Cluster4:
+
+High Sulfur Content (3.15).
+Ash Content: 9.14, above normal
+comparatively cheap fuel cost per MMBtu (1.88).
+ The fuels in Cluster 4 are less expensive per MMBtu, but they include more ash and sulfur. This cluster may indicate more affordable, less refined.
+
+In conclusion, the proportional composition of various fuel types with respect to clusters indicates that every cluster is a distinct mixture of economic factors and combustion characteristics. When choosing fuels based on particular standards, the clustering analysis offers insightful information.
+
+
+
