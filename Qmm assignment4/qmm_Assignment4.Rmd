@@ -1,0 +1,342 @@
+---
+title: "Qmm_Assignment_4"
+author: "Durga Prasad Gandi"
+date: "2023-10-27"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The Hope Valley Health Care Association owns and operates six nursing homes in adjoining states. An evaluation of their efficiency has been undertaken using two inputs and two outputs. The inputs are staffing labor (measured in average hours per day) and the cost of supplies (in thousands of dollars per day). The outputs are the number of patient-days reimbursed by thirdparty sources and the number of patient-days reimbursed privately. A summary of performance data is shown in the table below:
+
+
+### Load the necessary libraries
+```{r}
+library(Benchmarking)
+```
+
+## Let us create a data frame using the given data
+
+```{r}
+DMU= c("Facility1", "Facility2", "Facility3", "Facility4", "Facility5", "Facility6")
+Staffhoursperday= c(100,300,320,500,350,340)
+Suppliesperday= c(0.3,0.6,1.2,2,1.4,0.7)
+Reimbursedpatientdays= c(15000, 15000, 40000, 28000, 20000, 14000)
+Privatelypaidpatientdays= c(3500,20000,11000,42000,25000,15000)
+
+data <- data.frame(DMU, Staffhoursperday, Suppliesperday,Reimbursedpatientdays, Privatelypaidpatientdays)
+data
+
+```
+
+# Question
+
+In Hope valley health care association, we have 6 facilities in which there are 2 inputs and 2 outputs. The inputs are number of labour which is measured in a staff working hours per day and the cost of supplies whereas the outputs are the number of patients reimbursed by third party and the number of patients reimbursed privately.
+
+***Creation of matrix for the inputs and outputs***
+
+```{r}
+input <- matrix(c(100,300,320,500,350,340,
+                  0.3,0.6,1.2,2,1.4,0.7), byrow= FALSE, nrow =6)
+
+colnames(input) <- c("Staffhoursperday", "Supplies")
+
+rownames(input) <- c("Facility1", "Facility2", "Facility3", "Facility4", "Facility5", "Facility6")
+
+input
+```
+
+```{r}
+output <- matrix(c(15000, 15000, 40000, 28000, 20000, 14000,
+                   3500,20000,11000,42000,25000,15000), byrow=FALSE, nrow=6)
+
+rownames(output) <- c("Facility1", "Facility2", "Facility3", "Facility4", "Facility5", "Facility6")
+ 
+colnames(output) <- c("Reimbursedpatientdays", "Privatelypaidpatientdays")
+
+output
+
+```
+
+
+1. Formulate and perform DEA analysis under all DEA assumptions of FDH, CRS, VRS,IRS, DRS, and FRH.
+2. Determine the Peers and Lambdas under each of the above assumptions
+3. Summarize your results in a tabular format
+4. Compare and contrast the above results
+
+**Calculating the efficiency  using CRS assumption for given facilities**
+
+*Efficiency*
+**Assumptions is as follows:**
+
+The efficiency of a DMU is represented by the ratio of its actual performance to the optimal performance as shown by the efficiency frontier. The efficiency score ranges from 0 to 1, where 1 represents the ideal efficiency of DMU.
+
+The CRS assumption (proportion of  inputs to the outputs) is used in DEA analysis. It allows for fluctuations in input and output levels and provides efficiency scores for DMUs. Using the CRS assumption, non-unity efficiency scores are calculated to obtain relative efficiency.
+
+```{r}
+efficiency<- dea(input, output, RTS = "CRS")
+efficiency
+```
+Facility 3, Facility 5, and Facility 6 are less efficient than the other facilities in this situation.While Facility1, Facility2, and Facility 4 are 100% efficient, Facilities 3 and 5 are 87-93%, 89.52%, and 70.48% efficient, respectively.
+
+**Assumption 1: FDH**
+
+We can get rid of inputs and outputs that are superfluous or undesired thanks to free disposability. Put another way, a facility is said to dispose of excess inputs or outputs if it uses more inputs to generate less output or produces the same amount of output with more input.
+
+```{r}
+FDH <- dea(input, output, RTS ="FDH" )
+FDH
+
+```
+Facility 6 is 88.24% efficient according to the FDH assumption, while all other facilities are 100% efficient.
+
+```{r}
+dea.plot(input, output,RTS="FDH",ORIENTATION="in-out",txt=rownames(input))
+```
+
+
+**Peers**
+
+Peers, or efficient DMUs, are a group of facilities that are used to assess other inefficient DMUs. This implies that other DMUs use the efficient DMUs as a benchmark or norm.
+
+```{r}
+peers(FDH)
+```
+While Facility6 has Facility2 as a peer, meaning Facility2 is a benchmark for Facility6, Facility1, Facility2, Facility3, Facility4, and Facility 5 all have their own facilities as peers, meaning all five facilities are efficient.
+
+
+**Lambda**
+
+The lambda value shows how much a less efficient facility can pick up from its competitors.
+
+```{r}
+lambda(FDH)
+```
+Facility 6 is the only less efficient facility in this particular scenario, while Facility 2 is its only peer. While Facility 6's efficiency is 88.24%, 11.76% is inadequate. In this case, Facility6's lambda value is 1, implying that Facility2 can mitigate Facility6's 11.76% inefficiency. 
+
+
+**Assumption 2: CRS**
+
+According to the theory of constant returns to scale, an increase of one unit in the input will also result in an equal increase of units in the output.
+
+```{r}
+CRS <- dea(input, output,RTS="CRS")
+CRS
+```
+We can observe that while Facility3, Facility5, and Facility 6 are not 100% efficient, Facilities 1, 2, and 4 are efficient, as indicated by their values of 1, which indicates that they are 100% efficient. The efficiency of Facility3, Facility5, and Facility 6 are 87.93%, 89.42%, and 70.48%, respectively.
+
+
+```{r}
+dea.plot(input, output,RTS="CRS",ORIENTATION="in-out",txt=rownames(input))
+```
+
+```{r}
+peers(CRS)
+```
+Facilities 3, 5, and 6 are the only ones with peers in this case. Facility6, like Facility3, has two peers, however Facility6's peers are Facility1 and Facility2. Facility3 and Facility5 have two peers each.
+
+```{r}
+lambda(CRS)
+```
+Facilities 3 and 5 have two peers each with a weight of 2.57 from Facility1, 0.04 from Facility4, 0.57 from Facility4, and 0.22 from Facility1, 0.7 from Facility2. Facility 6 has two peers with a weight of 0.47 from Facility1, 0.57 from Facility4.
+
+
+
+**Assumption 3: DRS**
+
+The theory of decreasing returns to scale suggests that an increase in input will result in an output increase that is smaller than the increase in input.
+
+```{r}
+DRS <- dea(input, output, RTS = "DRS")
+DRS
+```
+With the exception of Facilities 5 and 6, all other facilities are efficient according to the DRS assumption. The respective efficiency of Facilities 5 and 6 is 89.42% and 70.48%. 
+
+```{r}
+dea.plot(input, output, RTS = "DRS", ORIENTATION = "in-out", txt = rownames(input))
+```
+
+```{r}
+peers(DRS)
+```
+Facility5 and Facility6 require peers because they are less effective. Facility1, Facility4 reduces the inefficiencies of Facility5, and Facility1, Facility2 reduces the inefficiencies of Facility 6.
+
+```{r}
+lambda(DRS)
+```
+Facilities 1 and 4 are contributing 0.26 and 0.57 percent to Facility 5's reduction in inefficiencies, while Facility 6 is contributing 0.22 and 0.71 percent.
+
+
+**Assumption 4: IRS**
+
+According to the theory of increasing returns to scale, an increase in input will result in a rise in output that is proportionately larger.
+
+```{r}
+IRS <- dea(input, output, RTS = "IRS")
+IRS
+```
+According to IRS assumptions, the efficiency of Facilities 1, 2, and 4 is 87.93%, whereas Facilities 3, 5, and 6 are 72.73%, 92.39%, and 879.3 percent, respectively.
+
+```{r}
+dea.plot(input, output, RTS = "IRS", ORIENTATION = "in-out", txt = rownames(input))
+```
+
+```{r}
+peers(IRS)
+```
+Peers for Facility 3 are 1,4 and peers for Facility 5 are 1,4, and peers for Facility 6 are Facility1, Facility 6. This indicates that Facilities 3, Facility 5, and Facility 6 are inefficient and will learn from their peers.
+
+```{r}
+lambda(IRS)
+```
+The weights of Facility 3's two peers are 2.57 from Facility 1, 0.04 from Facility 4, Facility 5's two peers are 0.44 from Facility 1, 0.55 from Facility 4, and Facility 6's two peers are 0.3 and 0.69.
+
+**Assumption 5: VRS**
+
+VRS allows for the possibility that some DMUs may function under growing returns to scale (IRS) while others run under decreasing returns to scale (DRS), hence assuming constant returns to scale (CRS).
+
+```{r}
+VRS <- dea(input, output, RTS = "VRS")
+VRS
+```
+Out of all the facilities, only Facility 5 and Facility 6 are less efficient, with 92.39% and 72.73% efficiency, respectively, whilst the remaining facilities have 100% efficiency.
+
+```{r} 
+dea.plot(input, output, RTS = "VRS", ORIENTATION = "in-out", txt=rownames(input))
+```
+```{r}
+peers(VRS)
+```
+Facility1, Facility4 is a peer for Facility5, and Facility1, Facility2 is a peer for Facility6, due to the lower efficiency of Facility5 and Facility 6.
+
+```{r}
+lambda(VRS)
+```
+The peer weights for Facility 5 are 0.44 from Facility1, 0.55 from Facility4, and for Facility 6, they are 0.3 from Facility1, 0.69 from Facility 2.
+
+
+**Assumption 6: FRH**
+
+For the facilities (DMUs) in the analysis, the complete replicability hull provides a comprehensive understanding of the feasible and efficient set of inputs and outputs.
+
+```{r}
+FRH <- dea(input, output, RTS= "add") 
+FRH
+```
+Every facility, with the exception of Facility 6, is 100% efficient. Facilities 6 alone has an efficiency of 88.24%. Its efficiency is deficient by 11.76%.
+
+```{r}
+dea.plot(input, output, RTS = "add", ORIENTATION = "in-out", txt = rownames(input))
+```
+
+```{r}
+peers(FRH)
+```
+While Facility6 has Facility2 as a peer, indicating Facility2 is a benchmark for Facility6, Facility1, Facility2, Facility3, Facility4, and Facility 5 all have their own facilities as peers, meaning all five facilities are efficient.
+
+
+```{r}
+lambda(FRH)
+```
+Facility 6 is the only less efficient facility in this instance, while Facility 2 is its only peer. Facility 6 is deficient by 11.76%, with an efficiency of 88.24%. In this case, Facility6's lambda value is 1, indicating that Facility2 can mitigate Facility6's 11.76% inefficiency.
+
+
+
+
+```{r}
+DMU <- matrix( c(
+    1.0000, 1.0000, 0.8793, 1.0000 ,0.8942 ,0.7048 ,
+    1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 0.8824,
+      1.0000, 1.0000, 0.8793, 1.0000, 0.8942, 0.7048,
+      1.0000, 1.0000, 1.0000, 1.0000, 0.8942, 0.7048,
+      1.0000, 1.0000, 0.8793, 1.0000, 0.9239, 0.7273,
+      1.0000, 1.0000, 1.0000, 1.0000, 0.9239, 0.7273,
+      1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 0.8824),byrow =FALSE, nrow =6)
+
+rownames(DMU) <- c("Facility1", "Facility2", "Facility3", "Facility4", "Facility5", "Facility6")
+colnames(DMU) <- c("e", "FDH", "CRS", "DRS", "IRS", "VRS", "FRH")
+DMU
+as.table(DMU)
+
+```
+```{r}
+peer_lambda <- matrix(c("Facility1", "Facility2", "Facility3", "Facility4", "Facility5", "Facility2",
+                        0,0,0,0,0,1,
+                        "Facility1", "Facility2", "Facility1, Facility4", "Facility4", "Facility1, Facility4", "Facility1, Facility2",
+                        0,0,"2.57, 0.04",0, "0.26, 0.57","0.22, 0.71",
+                        "Facility1", "Facility2", "Facility3", "Facility4","Facility1, Facility4", "Facility1, Facility2",
+                        0,0,0,0,"0.26, 0.57", "0.22, 0.71",
+                        "Facility1", "Facility2","Facility1, Facility4","Facility4", "Facility1, Facility4","Facility1, Facility2",
+                        0,0,"2.57, 0.04",0,"0.44, 0.55","0.30,0.69",
+                        "Facility1", "Facility2", "Facility3", "Facility4","Facility1, Facility4","Facility1, Facility2",
+                        0,0,0,0,"0.44, 0.55", "0.30, 0.69",
+                        "Facility1", "Facility2", "Facility3", "Facility4","Facility5","Facility2",
+                        0,0,0,0,0,1), byrow = FALSE, nrow = 6)
+rownames(peer_lambda) <- c("Facility1", "Facility2", "Facility3", "Facility4", "Facility5", "Facility6")
+colnames(peer_lambda) <- c("peers_FDH", "L_FDH", "peers_CRS", "L_CRS","peers_DRS", "L_DRS","peers_IRS", "L_IRS", "peers_VRS", "L_VRS", "peers_FRH", "L_FRH")
+
+as.table(peer_lambda)
+
+```
+
+**Compare and contrasting  the obtained results**
+
+# Summary:
+
+**Full disposal hull (FDH)**
+
+The relative effectiveness of decision-making units is assessed using FDH.There are one less efficient unit (Facility 6) and five efficient facilities (Facility1, Facility2, Facility3, Facility4, and Facility 5). "Efficient" in this sense describes how well these facilities are using their resources and running at peak performance.Facility 6's efficiency is 88.24%. Facility2 is Facility6's only peer, thus it's possible that Facility2 can assist Facility6 in becoming more productive .The statement suggests that Facility2 may be able to close the 11.76% efficiency gap with Facility6 if it helps Facility6.
+
+
+**Constant returns to scale (CRS)**
+
+The returns to scale in CRS are constant, so that an increase in input corresponds to an increase in output.
+
+Facility1, Facility2, and Facility 4 of the DMU are 100% efficient, while Facility 3, Facility 5, and Facility 6 are less efficient, which is The efficiency of Facilities 3 and 5 is 87.93%, 89.42%, and 70.48%, respectively. Given their lower efficiency, Facilities 3, 5, and 6 have counterparts. With weights of 2.57 and 0.04 from Facilities 1 and 4, Facility 3 has two peers. Two peers of Facility 5 are Facility 1 and Facility 4, with weights of 0.26 and 0.57, respectively. Additionally, Facility6 has two peers, Facility1 and Facility2, with weights of 0.22 and 0.71, respectively.
+
+DMU Facilities 1, 2, and 4 may be scaled up or down because of their great efficiency.
+
+**Decreasing Returns to Scale (DRS)**
+
+DRS recognizes that as a decision-making unit expands its activities, efficiency may alter and permits the examination of scale implications on efficiency. The output will be increased by smaller proportion that of  the input increased.
+
+All of the other facilities (DMUs) here, with the exception of Facilities 5 and 6, are efficient, meaning their value is 1. The efficiency of Facility 5 is 89.42%, while Facility 6 is 70.48%. Facility1 and Facility4, with weights of 0.26 and 0.57, are the peers of Facility5, and Facility1 and Facility2, with weights of 0.22 and 0.71, are the peers of Facility 6.
+
+Based on the findings, we may conclude that inefficient facilities can identify other DMUS to help scale the process.
+
+**Increasing Returns to Scale (IRS)**
+
+IRS makes the assumption that a facility or decision-making unit (DMU) becomes more efficient with an increase in its operational size, and that there is a positive correlation between efficiency and scale. 
+
+Facilities 1, 2, and 4 are productive, whereas Facilities 3, 5, and 6 are less productive, indicating that they are only 87.93%, 92.39%, and 72.73% productive, respectively, according to the results. Each of the facilities with lower productivity has two peers. Facility3 has Facility1 and Facility4 with weights of 2.57 and 0.04, Facility5 has weights of 0.44 and 0.55, and Facility6 has weights of 0.3 and 0.69 for Facility1 and Facility2.
+
+Peers are assigned weights, which suggests that by comparing themselves to more productive peers, these less productive facilities may be able to learn from and increase their efficiency.
+
+**Varying Returns to Scale (VRS)**
+
+The VRS approach acknowledges that a facility's or decision-making unit's (DMU's) efficiency may fluctuate depending on how big its operations are, meaning it may go up or down.
+
+Just two facilities—Facilities 5 (92.39%) and Facility 6 (72.73%)—are less efficient in VRS than Facilities 1, 2, 3, and 4. Every facility with lower efficiency has two peers. Facility5's counterparts are Facilities 1 and 4, who have weights of 0.44 and 0.55, respectively. Facility6's peers are Facilities 1 and 2, with weights of 0.3 and 0.69, respectively.
+
+Varying returns to scale allow the operations' scale to vary in response to changes in the input and output components, either growing or decreasing.
+
+**Free Replicability hull (FRH)**
+
+According to the FRH data, all of the facilities—aside from Facility 6—are operational, and Facility 2 is the only peer. Peer weight for Facility 6 is 1, indicating that only one peer is accountable for improving the inefficient unit.
+
+***Conclusion***
+
+While Facilities 3, 5, and 6 have various values depending on each assumption, Facilities 1, 2, and 4 are 100% efficient because all of the assumptions result in a value of 1. 
+Based on the specific models or assumptions used in the inquiry, the results demonstrate that some facilities consistently maintain high levels of efficiency, while other facilities display different efficiency values. This suggests that a range of situations or occurrences could affect the effectiveness of the latter group, leading to differences in their assessed output.
+
+DEA allows entities and organizations to assess their efficacy and identify areas that require improvement, making it a useful tool for benchmarking and performance evaluation. In efficiency assessments, strategic decision-making, and performance evaluations, it is widely used.
+DEA provides information on resource allocation, output enhancement, and operational optimization to decision-makers by focusing on regions that are not functioning up to standards.
+
+
+
+
+
